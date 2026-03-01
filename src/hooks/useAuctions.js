@@ -1,41 +1,72 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 
+// Read SHOW_HISTORY from env: positive number = limit, -1 = fetch all
+const SHOW_HISTORY = parseInt(import.meta.env.VITE_SHOW_HISTORY || '-1', 10)
+
 export const useAuctions = (options = {}) => {
   return useQuery({
     queryKey: ['auctions', options],
     queryFn: async () => {
-      let query = supabase
-        .from('auctions')
-        .select('*')
-        .order('inserted_at', { ascending: false })
+      const buildBaseQuery = () => {
+        let query = supabase
+          .from('auctions')
+          .select('*')
+          .order('inserted_at', { ascending: false })
 
-      // Apply filters if provided
-      if (options.category && options.category !== 'all') {
-        query = query.eq('category', options.category)
+        // Apply filters if provided
+        if (options.category && options.category !== 'all') {
+          query = query.eq('category', options.category)
+        }
+
+        if (options.seller) {
+          query = query.ilike('seller', `%${options.seller}%`)
+        }
+
+        if (options.item) {
+          query = query.ilike('item', `%${options.item}%`)
+        }
+
+        return query
       }
 
-      if (options.seller) {
-        query = query.ilike('seller', `%${options.seller}%`)
-      }
-
-      if (options.item) {
-        query = query.ilike('item', `%${options.item}%`)
-      }
-
-      // Apply pagination
+      // Apply pagination if explicitly requested by the caller
       if (options.page && options.pageSize) {
+        let query = buildBaseQuery()
         const from = (options.page - 1) * options.pageSize
         const to = from + options.pageSize - 1
         query = query.range(from, to)
+        const { data, error, count } = await query
+        if (error) throw new Error(error.message)
+        return { data, count }
       }
 
+      // When SHOW_HISTORY is -1, fetch ALL rows by paginating through Supabase's
+      // 1000-row default limit. Otherwise respect the configured limit.
+      if (SHOW_HISTORY === -1) {
+        const PAGE_SIZE = 1000
+        let allData = []
+        let page = 0
+        let hasMore = true
+
+        while (hasMore) {
+          const from = page * PAGE_SIZE
+          const to = from + PAGE_SIZE - 1
+          const query = buildBaseQuery().range(from, to)
+          const { data, error } = await query
+          if (error) throw new Error(error.message)
+          allData = allData.concat(data)
+          hasMore = data.length === PAGE_SIZE
+          page++
+        }
+
+        return { data: allData, count: allData.length }
+      }
+
+      // Positive SHOW_HISTORY: fetch at most that many recent rows
+      const query = buildBaseQuery().limit(SHOW_HISTORY)
       const { data, error, count } = await query
-
-      if (error) {
-        throw new Error(error.message)
-      }
-
+      if (error) throw new Error(error.message)
       return { data, count }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

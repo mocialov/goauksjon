@@ -17,6 +17,9 @@ import { loadMapSelection, saveMapSelection } from './lib/userPreferences'
 import './App.css'
 import { matchFallbackLocation } from '@/lib/fallbackCoordinates'
 
+// Read SHOW_HISTORY from env: positive = limit recent items for selected area, -1 = all
+const SHOW_HISTORY = parseInt(import.meta.env.VITE_SHOW_HISTORY || '-1', 10)
+
 // --- Dashboard Page ---
 function DashboardPage() {
   const [activeTab, setActiveTab] = useState('table')
@@ -163,10 +166,16 @@ function DashboardPage() {
   const areaFilteredAuctions = useMemo(() => {
     const base = filteredAuctionsBase
     if (!selectedBounds) return base
-    return base.filter(auction => {
+    const inArea = base.filter(auction => {
       const coord = resolveCoordinate(auction.location)
       return coord && isWithinBounds(coord, selectedBounds)
     })
+    // Apply SHOW_HISTORY limit: data is already sorted by inserted_at desc,
+    // so slicing from the front gives the most recent items.
+    if (SHOW_HISTORY > 0) {
+      return inArea.slice(0, SHOW_HISTORY)
+    }
+    return inArea // SHOW_HISTORY === -1 → show all
   }, [filteredAuctionsBase, coordinates, selectedBounds, resolveCoordinate])
 
   // First-page slice respecting current pageSize (used when no area selection)
@@ -175,7 +184,7 @@ function DashboardPage() {
   }, [areaFilteredAuctions, currentPageSize])
 
   // Map rules:
-  // 1. If a selection rectangle exists -> show ALL auctions inside selection (with table filters applied)
+  // 1. If a selection rectangle exists -> show recent auctions inside selection (limited by SHOW_HISTORY)
   // 2. If no selection -> show ONLY visible table rows (respecting pagination)
   const filteredAuctionsForMap = selectedBounds ? areaFilteredAuctions : visibleTableRows
 
