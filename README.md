@@ -1,4 +1,4 @@
-# Auction Data Dashboard
+# GoAuksjon
 
 A modern, responsive frontend application for visualizing and managing auction data from Supabase. Built with React, TypeScript, and modern web technologies to provide comprehensive table functionality and real-time data insights.
 
@@ -60,7 +60,7 @@ A modern, responsive frontend application for visualizing and managing auction d
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd auction-frontend
+   cd goauksjon
    ```
 
 2. **Install dependencies**
