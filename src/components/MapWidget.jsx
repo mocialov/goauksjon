@@ -258,6 +258,8 @@ const ManualDraw = ({ active, onFinish, onCancel, drawingStartRef, drawingRectRe
       map.doubleClickZoom.enable()
       map.boxZoom.enable()
       map.keyboard.enable()
+      if (map.tap) map.tap.enable()
+      if (map.touchZoom) map.touchZoom.enable()
     }
     const disableMapInteractions = () => {
       map.dragging.disable()
@@ -265,9 +267,11 @@ const ManualDraw = ({ active, onFinish, onCancel, drawingStartRef, drawingRectRe
       map.doubleClickZoom.disable()
       map.boxZoom.disable()
       map.keyboard.disable()
+      if (map.tap) map.tap.disable()
+      if (map.touchZoom) map.touchZoom.disable()
     }
 
-    const handleMouseDown = (e) => {
+    const handleDrawStart = (e) => {
       if (!active) return
       const { latlng } = e
       drawingStartRef.current = latlng
@@ -278,7 +282,7 @@ const ManualDraw = ({ active, onFinish, onCancel, drawingStartRef, drawingRectRe
       }
     }
 
-    const handleMouseMove = (e) => {
+    const handleDrawMove = (e) => {
       if (!active) return
       if (!drawingStartRef.current) return
       const start = drawingStartRef.current
@@ -295,6 +299,61 @@ const ManualDraw = ({ active, onFinish, onCancel, drawingStartRef, drawingRectRe
       } else {
         drawingRectRef.current.setBounds(bounds)
       }
+    }
+
+    const handleDrawEnd = () => {
+      if (!active) return
+      finalize()
+    }
+
+    // Touch event handlers that convert touch coords to latlng
+    const mapContainer = map.getContainer()
+
+    const handleTouchStart = (e) => {
+      if (!active) return
+      if (e.touches.length !== 1) return // single finger only
+      e.preventDefault()
+      const touch = e.touches[0]
+      const latlng = map.containerPointToLatLng(L.point(
+        touch.clientX - mapContainer.getBoundingClientRect().left,
+        touch.clientY - mapContainer.getBoundingClientRect().top
+      ))
+      drawingStartRef.current = latlng
+      if (drawingRectRef.current) {
+        drawingRectRef.current.remove()
+        drawingRectRef.current = null
+      }
+    }
+
+    const handleTouchMove = (e) => {
+      if (!active) return
+      if (!drawingStartRef.current) return
+      if (e.touches.length !== 1) return
+      e.preventDefault()
+      const touch = e.touches[0]
+      const current = map.containerPointToLatLng(L.point(
+        touch.clientX - mapContainer.getBoundingClientRect().left,
+        touch.clientY - mapContainer.getBoundingClientRect().top
+      ))
+      const start = drawingStartRef.current
+      const bounds = L.latLngBounds([start.lat, start.lng], [current.lat, current.lng])
+      if (!drawingRectRef.current) {
+        drawingRectRef.current = L.rectangle(bounds, {
+          color: '#ff7800',
+          weight: 2,
+          opacity: 0.9,
+          fillColor: '#ff7800',
+          fillOpacity: 0.15
+        }).addTo(map)
+      } else {
+        drawingRectRef.current.setBounds(bounds)
+      }
+    }
+
+    const handleTouchEnd = (e) => {
+      if (!active) return
+      e.preventDefault()
+      finalize()
     }
 
     const finalize = () => {
@@ -345,15 +404,23 @@ const ManualDraw = ({ active, onFinish, onCancel, drawingStartRef, drawingRectRe
 
     if (active) {
       disableMapInteractions()
-      map.on('mousedown', handleMouseDown)
-      map.on('mousemove', handleMouseMove)
+      // Mouse events (desktop)
+      map.on('mousedown', handleDrawStart)
+      map.on('mousemove', handleDrawMove)
       map.on('mouseup', handleMouseUp)
+      // Touch events (mobile) - attached to DOM container directly
+      mapContainer.addEventListener('touchstart', handleTouchStart, { passive: false })
+      mapContainer.addEventListener('touchmove', handleTouchMove, { passive: false })
+      mapContainer.addEventListener('touchend', handleTouchEnd, { passive: false })
       document.addEventListener('keydown', handleKeyDown)
     } else {
       enableMapInteractions()
-      map.off('mousedown', handleMouseDown)
-      map.off('mousemove', handleMouseMove)
+      map.off('mousedown', handleDrawStart)
+      map.off('mousemove', handleDrawMove)
       map.off('mouseup', handleMouseUp)
+      mapContainer.removeEventListener('touchstart', handleTouchStart)
+      mapContainer.removeEventListener('touchmove', handleTouchMove)
+      mapContainer.removeEventListener('touchend', handleTouchEnd)
       document.removeEventListener('keydown', handleKeyDown)
       if (drawingRectRef.current) {
         drawingRectRef.current.remove()
@@ -363,9 +430,12 @@ const ManualDraw = ({ active, onFinish, onCancel, drawingStartRef, drawingRectRe
     }
 
     return () => {
-      map.off('mousedown', handleMouseDown)
-      map.off('mousemove', handleMouseMove)
+      map.off('mousedown', handleDrawStart)
+      map.off('mousemove', handleDrawMove)
       map.off('mouseup', handleMouseUp)
+      mapContainer.removeEventListener('touchstart', handleTouchStart)
+      mapContainer.removeEventListener('touchmove', handleTouchMove)
+      mapContainer.removeEventListener('touchend', handleTouchEnd)
       document.removeEventListener('keydown', handleKeyDown)
       enableMapInteractions()
       if (drawingRectRef.current) {
