@@ -335,31 +335,20 @@ function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">GoAuksjon</h1>
-              <p className="text-muted-foreground mt-1">
+      <header className="border-b bg-card sticky top-0 z-50">
+        <div className="container mx-auto px-3 py-3 sm:px-4 sm:py-4 md:py-6">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight truncate">GoAuksjon</h1>
+              <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">
                 Monitor and analyze auction data in real-time
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              {/* Navigation links */}
-              {/* <Link to="/" className="flex items-center gap-2">
-                <Button variant="default" size="sm">
-                  <Home className="h-4 w-4" /> Dashboard
-                </Button>
-              </Link> */}
-              {/* <Link to="/product-demo" className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
-                  <ShoppingCart className="h-4 w-4" /> Product Demo
-                </Button>
-              </Link> */}
+            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
               {hasError && (
-                <Badge variant="destructive" className="flex items-center gap-1">
+                <Badge variant="destructive" className="flex items-center gap-1 text-xs">
                   <AlertCircle className="h-3 w-3" />
-                  Connection Error
+                  <span className="hidden sm:inline">Connection </span>Error
                 </Badge>
               )}
               <Button 
@@ -367,9 +356,10 @@ function DashboardPage() {
                 disabled={auctionsLoading || statsLoading || hourlyLoading}
                 variant="outline"
                 size="sm"
+                className="h-9 px-2 sm:px-3"
               >
-                <RefreshCw className={`mr-2 h-4 w-4 ${(auctionsLoading || statsLoading || hourlyLoading) ? 'animate-spin' : ''}`} />
-                Refresh
+                <RefreshCw className={`h-4 w-4 ${(auctionsLoading || statsLoading || hourlyLoading) ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline ml-2">Refresh</span>
               </Button>
             </div>
           </div>
@@ -377,8 +367,8 @@ function DashboardPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <main className="container mx-auto px-2 py-3 sm:px-4 sm:py-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3 sm:space-y-6">
           {import.meta.env.VITE_DEBUG === '1' && (
             <TabsList>
               <TabsTrigger value="table">Dashboard</TabsTrigger>
@@ -386,9 +376,9 @@ function DashboardPage() {
             </TabsList>
           )}
 
-          <TabsContent value="table" className="space-y-6">
+          <TabsContent value="table" className="space-y-3 sm:space-y-6">
             <HourlyChart stats={hourlyData} isLoading={hourlyLoading} />
-            <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex flex-col lg:flex-row gap-3 sm:gap-6">
               <div className="lg:w-2/3 w-full">
                 <MapWidget 
                   auctions={filteredAuctionsForMap} 
@@ -402,15 +392,15 @@ function DashboardPage() {
               </div>
             </div>
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  All Auction Data
-                  <Badge variant="secondary">
-                    {statsData?.totalCount || auctions.length} total items
+              <CardHeader className="px-3 py-3 sm:px-6 sm:py-4">
+                <CardTitle className="flex items-center justify-between gap-2 text-base sm:text-lg">
+                  <span className="truncate">All Auction Data</span>
+                  <Badge variant="secondary" className="shrink-0 text-xs">
+                    {statsData?.totalCount || auctions.length} items
                   </Badge>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-2 sm:px-6">
                 {hasError ? (
                   <div className="flex items-center justify-center h-32 text-muted-foreground">
                     <div className="text-center">
@@ -456,9 +446,9 @@ function DashboardPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-card mt-12">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
+      <footer className="border-t bg-card mt-6 sm:mt-12 safe-bottom">
+        <div className="container mx-auto px-3 py-3 sm:px-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-1 text-xs sm:text-sm text-muted-foreground">
             <p>GoAuksjon — Real-time auction monitoring</p>
             <p>Last updated: {new Date().toLocaleTimeString()}</p>
           </div>
@@ -485,20 +475,20 @@ function ProductDemoPage() {
   // Optionally add a header/footer for consistency
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-6">
+      <header className="border-b bg-card sticky top-0 z-50">
+        <div className="container mx-auto px-3 py-3 sm:px-4 sm:py-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Product Demo</h1>
-            <p className="text-muted-foreground mt-1">Explore the product demo features</p>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Product Demo</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1">Explore the product demo features</p>
           </div>
         </div>
       </header>
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-2 py-3 sm:px-4 sm:py-6">
         <ProductDemo />
       </main>
-      <footer className="border-t bg-card mt-12">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
+      <footer className="border-t bg-card mt-6 sm:mt-12 safe-bottom">
+        <div className="container mx-auto px-3 py-3 sm:px-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-1 text-xs sm:text-sm text-muted-foreground">
             <p>GoAuksjon — Real-time auction monitoring</p>
             <p>Last updated: {new Date().toLocaleTimeString()}</p>
           </div>

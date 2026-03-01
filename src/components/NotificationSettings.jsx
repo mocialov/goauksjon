@@ -227,11 +227,11 @@ export default function NotificationSettings({ currentMapBounds, currentFilters 
 
   return (
     <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            <CardTitle>Notification Settings</CardTitle>
+      <CardHeader className="px-3 py-3 sm:px-6 sm:py-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Bell className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+            <CardTitle className="text-base sm:text-lg truncate">Notification Settings</CardTitle>
           </div>
           <Switch
             checked={preferences.enabled}
@@ -298,12 +298,12 @@ export default function NotificationSettings({ currentMapBounds, currentFilters 
 
         {/* Category Filters */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <Label className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
-              Categories ({preferences.selectedCategories?.length || 0} selected)
+              <span className="text-xs sm:text-sm">Categories ({preferences.selectedCategories?.length || 0})</span>
             </Label>
-            <div className="flex gap-2">
+            <div className="flex gap-1 sm:gap-2 flex-wrap">
               <Button
                 variant="ghost"
                 size="sm"
@@ -359,10 +359,10 @@ export default function NotificationSettings({ currentMapBounds, currentFilters 
 
         {/* Seller Filters */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <Label className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
-              Sellers ({preferences.selectedSellers?.length || 0} selected)
+              <span className="text-xs sm:text-sm">Sellers ({preferences.selectedSellers?.length || 0})</span>
             </Label>
             <div className="flex gap-2">
               <Button
@@ -408,12 +408,12 @@ export default function NotificationSettings({ currentMapBounds, currentFilters 
 
         {/* Map Bounds */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <Label className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
-              Geographic Area
+              <span className="text-xs sm:text-sm">Geographic Area</span>
             </Label>
-            <div className="flex gap-2">
+            <div className="flex gap-1 sm:gap-2 flex-wrap">
               {currentMapBounds && (
                 <Button
                   variant="outline"
@@ -528,19 +528,20 @@ export default function NotificationSettings({ currentMapBounds, currentFilters 
         )}
 
         {/* Action Buttons */}
-        <div className="flex gap-3 pt-4">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
           <Button
             onClick={handleSave}
             disabled={!preferences.enabled || isSaving || !!emailError}
             className="flex-1"
           >
             <Save className="mr-2 h-4 w-4" />
-            {isSaving ? 'Saving...' : 'Save Preferences'}
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
           <Button
             onClick={handleClearAll}
             variant="destructive"
             disabled={isSaving}
+            className="sm:w-auto"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Clear All

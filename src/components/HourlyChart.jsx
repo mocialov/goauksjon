@@ -37,6 +37,8 @@ const HourlyChart = ({ stats, isLoading }) => {
   }
 
   const { chartData } = stats
+  // Simple check for mobile viewport
+  const isMobileView = typeof window !== 'undefined' && window.innerWidth < 640
   // Collect categories from all rows (exclude hour & average)
   const collected = new Set()
   chartData.forEach(row => {
@@ -72,21 +74,25 @@ const HourlyChart = ({ stats, isLoading }) => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Today's Hourly Listings by Category (vs 30-Day Average)</CardTitle>
+      <CardHeader className="px-3 py-3 sm:px-6 sm:py-4">
+        <CardTitle className="text-sm sm:text-base md:text-lg leading-snug">
+          <span className="hidden sm:inline">Today's Hourly Listings by Category (vs 30-Day Average)</span>
+          <span className="sm:hidden">Hourly Listings Today</span>
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+      <CardContent className="px-1 pb-3 sm:px-6 sm:pb-6">
+        <ResponsiveContainer width="100%" height={isMobileView ? 220 : 300}>
+          <LineChart data={chartData} margin={isMobileView ? { top: 10, right: 10, left: -10, bottom: 10 } : { top: 20, right: 30, left: 20, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis
               dataKey="hour"
               className="fill-muted-foreground"
-              fontSize={12}
+              fontSize={isMobileView ? 10 : 12}
+              interval={isMobileView ? 2 : 0}
             />
-            <YAxis className="fill-muted-foreground" />
+            <YAxis className="fill-muted-foreground" fontSize={isMobileView ? 10 : 12} width={isMobileView ? 30 : 60} />
             <Tooltip content={<CustomTooltip />} />
-            <Legend />
+            {!isMobileView && <Legend />}
             {categories.map((category) => (
               <Line
                 key={category}

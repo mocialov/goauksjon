@@ -42,6 +42,7 @@ import {
 } from 'lucide-react'
 import { format, isWithinInterval } from 'date-fns'
 import { cn } from '@/lib/utils'
+import { useIsMobile } from '@/hooks/use-mobile'
 import {
   saveFilterPreferences,
   loadFilterPreferences,
@@ -90,6 +91,7 @@ const AuctionTable = ({
 
   // Track if preferences have been loaded to prevent premature initialization
   const [preferencesLoaded, setPreferencesLoaded] = useState(false)
+  const isMobile = useIsMobile()
 
   // Load preferences from localStorage on component mount
   useEffect(() => {
@@ -706,10 +708,10 @@ const AuctionTable = ({
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-2 sm:gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Auction Items</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Auction Items</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm">
             {filteredRowCount > 0 ? (
               <>Viewing {filteredRowCount} item{filteredRowCount !== 1 ? 's' : ''}</>
             ) : (
@@ -720,8 +722,8 @@ const AuctionTable = ({
       </div>
 
       {/* Search and Filter Bar */}
-      <Card className="p-4">
-        <div className="space-y-4">
+      <Card className="p-2 sm:p-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Top Row: Search and Filter Toggle */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="relative flex-1">
@@ -811,7 +813,7 @@ const AuctionTable = ({
 
           {/* Expanded Filters */}
           {showFilters && (
-            <div className="grid gap-4 border-t pt-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:gap-4 border-t pt-3 sm:pt-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {/* Date Range Filter */}
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm font-medium">
@@ -849,7 +851,7 @@ const AuctionTable = ({
                       defaultMonth={dateRange?.from}
                       selected={dateRange}
                       onSelect={(range) => setDateRange(range || null)}
-                      numberOfMonths={2}
+                      numberOfMonths={isMobile ? 1 : 2}
                       className="pointer-events-auto"
                     />
                   </PopoverContent>
@@ -959,83 +961,136 @@ const AuctionTable = ({
         </div>
       </Card>
 
-      {/* Table */}
-      <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="border-b bg-muted/50">
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                      style={{ width: header.getSize() }}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getPaginationRowModel().rows?.length ? (
-                table.getPaginationRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="border-b transition-colors hover:bg-muted/50 cursor-pointer"
-                    onClick={() => {
-                      const url = row.original.url
-                      if (url) {
-                        window.open(url, '_blank', 'noopener,noreferrer')
-                      }
-                    }}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="p-4 align-middle">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
+      {/* Table - Desktop view */}
+      {!isMobile ? (
+        <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id} className="border-b bg-muted/50">
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
+                        style={{ width: header.getSize() }}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </th>
                     ))}
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={columns.length}
-                    className="h-24 text-center text-muted-foreground"
-                  >
-                    No results found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      {/* Pagination */}
-      <div className="flex items-center justify-between px-2">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {filteredRowCount > 0 ? (
-            <>
-              Showing {Math.min((pagination.pageIndex * pagination.pageSize) + 1, filteredRowCount)}-{Math.min((pagination.pageIndex + 1) * pagination.pageSize, filteredRowCount)} of {filteredRowCount} items
-              {typeof totalCount === 'number' && filteredRowCount < totalCount && <> (filtered from {totalCount} total)</>}
-            </>
+                ))}
+              </thead>
+              <tbody>
+                {table.getPaginationRowModel().rows?.length ? (
+                  table.getPaginationRowModel().rows.map((row) => (
+                    <tr
+                      key={row.id}
+                      className="border-b transition-colors hover:bg-muted/50 cursor-pointer"
+                      onClick={() => {
+                        const url = row.original.url
+                        if (url) {
+                          window.open(url, '_blank', 'noopener,noreferrer')
+                        }
+                      }}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id} className="p-4 align-middle">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={columns.length}
+                      className="h-24 text-center text-muted-foreground"
+                    >
+                      No results found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      ) : (
+        /* Mobile card view */
+        <div className="space-y-2">
+          {table.getPaginationRowModel().rows?.length ? (
+            table.getPaginationRowModel().rows.map((row) => (
+              <Card
+                key={row.id}
+                className="p-3 cursor-pointer active:bg-muted/50 transition-colors"
+                onClick={() => {
+                  const url = row.original.url
+                  if (url) {
+                    window.open(url, '_blank', 'noopener,noreferrer')
+                  }
+                }}
+              >
+                <div className="space-y-1.5">
+                  <div className="font-medium text-sm leading-snug break-words">
+                    {row.original.item}
+                  </div>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    {row.original.category && (
+                      <span className="flex items-center gap-1">
+                        <Tag className="h-3 w-3" />
+                        {row.original.category}
+                      </span>
+                    )}
+                    {row.original.seller && (
+                      <span className="flex items-center gap-1">
+                        <User className="h-3 w-3" />
+                        {mapSellerToCategory(row.original.seller)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {row.original.inserted_at ? format(new Date(row.original.inserted_at), 'MMM dd, HH:mm') : '—'}
+                    </span>
+                    {row.original.location && (
+                      <span className="truncate ml-2 max-w-[120px]">{row.original.location}</span>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            ))
           ) : (
-            <>No items to display</>
+            <div className="h-24 flex items-center justify-center text-muted-foreground text-sm">
+              No results found.
+            </div>
           )}
         </div>
-        <div className="flex items-center space-x-6 lg:space-x-8">
-          <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Rows per page</p>
+      )}
+
+      {/* Pagination */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-1 sm:px-2">
+        <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
+          {filteredRowCount > 0 ? (
+            <>
+              {Math.min((pagination.pageIndex * pagination.pageSize) + 1, filteredRowCount)}-{Math.min((pagination.pageIndex + 1) * pagination.pageSize, filteredRowCount)} of {filteredRowCount}
+              {typeof totalCount === 'number' && filteredRowCount < totalCount && <> (from {totalCount})</>}
+            </>
+          ) : (
+            <>No items</>
+          )}
+        </div>
+        <div className="flex items-center justify-center gap-2 sm:gap-4 lg:gap-8 flex-wrap">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <p className="text-xs sm:text-sm font-medium whitespace-nowrap">Per page</p>
             <Select
               value={`${table.getState().pagination.pageSize}`}
               onValueChange={(value) => {
@@ -1044,7 +1099,7 @@ const AuctionTable = ({
                 table.setPageSize(size)
               }}
             >
-              <SelectTrigger className="h-8 w-[70px]">
+              <SelectTrigger className="h-8 w-[60px] sm:w-[70px] text-xs sm:text-sm">
                 <SelectValue placeholder={table.getState().pagination.pageSize} />
               </SelectTrigger>
               <SelectContent side="top">
@@ -1056,17 +1111,17 @@ const AuctionTable = ({
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center justify-center text-sm font-medium min-w-[140px]">
-            Page {table.getState().pagination.pageIndex + 1} of {Math.max(1, table.getPageCount())}
+          <div className="text-xs sm:text-sm font-medium whitespace-nowrap">
+            {table.getState().pagination.pageIndex + 1}/{Math.max(1, table.getPageCount())}
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-1">
             <Button
               variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
+              className="h-8 w-8 p-0"
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage() || table.getPageCount() <= 1}
             >
-              <span className="sr-only">Go to first page</span>
+              <span className="sr-only">First page</span>
               <ChevronsLeft className="h-4 w-4" />
             </Button>
             <Button
@@ -1075,7 +1130,7 @@ const AuctionTable = ({
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage() || table.getPageCount() <= 1}
             >
-              <span className="sr-only">Go to previous page</span>
+              <span className="sr-only">Previous</span>
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button
@@ -1084,16 +1139,16 @@ const AuctionTable = ({
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage() || table.getPageCount() <= 1}
             >
-              <span className="sr-only">Go to next page</span>
+              <span className="sr-only">Next</span>
               <ChevronRight className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
+              className="h-8 w-8 p-0"
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage() || table.getPageCount() <= 1}
             >
-              <span className="sr-only">Go to last page</span>
+              <span className="sr-only">Last page</span>
               <ChevronsRight className="h-4 w-4" />
             </Button>
           </div>

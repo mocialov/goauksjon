@@ -32,8 +32,9 @@ const CategoryChart = ({ stats, isLoading }) => {
     .filter(item => item.count > 0)
     .sort((a, b) => b.count - a.count)
 
-  // Map height is roughly 48rem; with barSize 24 and gap ~10%, approximate visible bars count
-  const MAX_VISIBLE = 25 // approximate number of bars (24px each + gaps) to fit within 48rem without scroll
+  // Map height is responsive; with barSize 24 and gap ~10%, approximate visible bars count
+  const isMobileView = typeof window !== 'undefined' && window.innerWidth < 640
+  const MAX_VISIBLE = isMobileView ? 15 : 25 // Show fewer on mobile
   const coloredAll = chartData.map(item => ({
     ...item,
     color: getCategoryColor(item.fullCategory)
@@ -63,11 +64,11 @@ const CategoryChart = ({ stats, isLoading }) => {
     <div className="rounded-md">
       <div className="flex justify-center">
           {/* Fixed height aligned with map (48rem). No scrolling; cap categories. */}
-          <ResponsiveContainer width="100%" height={Math.max(320, Math.min(768, coloredData.length * 30))}>
+          <ResponsiveContainer width="100%" height={Math.max(240, Math.min(isMobileView ? 480 : 768, coloredData.length * (isMobileView ? 26 : 30)))}>
             <BarChart
             data={coloredData}
             layout="vertical"
-              margin={{ top: 20, right: 30, left: 60, bottom: 20 }}
+              margin={isMobileView ? { top: 10, right: 20, left: 10, bottom: 10 } : { top: 20, right: 30, left: 60, bottom: 20 }}
           >
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis 
@@ -88,28 +89,28 @@ const CategoryChart = ({ stats, isLoading }) => {
               <Bar 
                 dataKey="count" 
                 radius={[0, 6, 6, 0]}
-                barSize={24} /* Thicker bars for expanded y-axis */
-                barCategoryGap="10%" /* Slight gap between categories */
+                barSize={isMobileView ? 20 : 24}
+                barCategoryGap="10%"
               >
                 <LabelList 
                   dataKey="category" 
                   content={(props) => {
                     const { x, y, width, height, value } = props
                     if (value == null) return null
-                    const padding = 6
+                    const padding = 4
                     const textX = x + padding
                     const centerY = y + height / 2
                     return (
                       <text
                         x={textX}
                         y={centerY}
-                        fontSize={11}
+                        fontSize={isMobileView ? 9 : 11}
                         fontWeight={500}
                         fill="var(--foreground)"
                         dominantBaseline="middle"
                         style={{ whiteSpace: 'nowrap' }}
                       >
-                        {value}
+                        {isMobileView && value.length > 20 ? value.slice(0, 18) + '…' : value}
                       </text>
                     )
                   }}

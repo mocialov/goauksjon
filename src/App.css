@@ -119,6 +119,35 @@
   }
 }
 
+/* Mobile: make Leaflet zoom controls larger for touch */
+@media (max-width: 767px) {
+  .leaflet-control-zoom a {
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    font-size: 20px !important;
+  }
+  
+  .leaflet-bar a {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  
+  .leaflet-control-draw a {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  
+  /* Make map attribution smaller on mobile */
+  .leaflet-control-attribution {
+    font-size: 8px !important;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
 /* Marker cluster styles - always blue */
 .custom-cluster-icon {
   background: transparent !important;

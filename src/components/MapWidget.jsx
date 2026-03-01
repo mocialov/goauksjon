@@ -468,17 +468,17 @@ const MapWidget = ({ auctions = [], coordinates = {}, onAreaSelect, selectedBoun
   }
 
   return (
-  <div className="relative w-full h-[48rem] rounded-lg overflow-hidden border">
+  <div className="relative w-full h-[24rem] sm:h-[32rem] lg:h-[48rem] rounded-lg overflow-hidden border touch-pan-y">
       {/* Clear Selection Button - appears when area is selected */}
       {selectedBounds && (
         <button
           onClick={clearSelection}
-          className="absolute top-2 right-2 z-[1000] bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 px-3 py-2 rounded-md shadow-sm text-sm font-medium transition-colors duration-200 flex items-center gap-1"
+          className="absolute top-2 right-2 z-[1000] bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 px-2 py-1.5 sm:px-3 sm:py-2 rounded-md shadow-sm text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
           title="Clear selection"
         >
           <svg 
-            width="16" 
-            height="16" 
+            width="14" 
+            height="14" 
             viewBox="0 0 24 24" 
             fill="none" 
             stroke="currentColor" 
@@ -489,13 +489,15 @@ const MapWidget = ({ auctions = [], coordinates = {}, onAreaSelect, selectedBoun
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
-          Clear Selection
+          <span className="hidden sm:inline">Clear Selection</span>
+          <span className="sm:hidden">Clear</span>
         </button>
       )}
       {/* Drawing instructions overlay */}
       {isDrawing && (
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-[1000] bg-blue-500 text-white px-4 py-2 rounded-md shadow-lg text-sm font-medium">
-          Click and drag on the map to draw a rectangle
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-[1000] bg-blue-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-md shadow-lg text-xs sm:text-sm font-medium max-w-[90%] text-center">
+          <span className="hidden sm:inline">Click and drag on the map to draw a rectangle</span>
+          <span className="sm:hidden">Tap and drag to select area</span>
         </div>
       )}
       <MapContainer 
