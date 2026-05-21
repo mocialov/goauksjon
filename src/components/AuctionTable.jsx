@@ -510,14 +510,15 @@ const AuctionTable = ({
     [findParentCategory]
   )
 
-  // Use client-side pagination (manualPagination=false). We let react-table derive pageCount
-  // from the filtered row model so page numbers update after filters are applied.
-  const shouldUseManualPagination = false
+  // Use server-side pagination: the parent passes one page of rows and totalCount.
+  const shouldUseManualPagination = true
+  const pageCount = totalCount ? Math.ceil(totalCount / pagination.pageSize) : 0
 
   const table = useReactTable({
     data,
     columns,
     manualPagination: shouldUseManualPagination,
+    pageCount,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
