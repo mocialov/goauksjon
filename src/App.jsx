@@ -35,6 +35,7 @@ function DashboardPage() {
   const [selectedBounds, setSelectedBounds] = useState(null)
   const [resetPageSignal, setResetPageSignal] = useState(0)
   const [currentPageSize, setCurrentPageSize] = useState(10)
+  const [tablePagination, setTablePagination] = useState({ pageIndex: 0, pageSize: 10 })
   const prevSelectedBoundsRef = useRef(null)
 
   const {
@@ -42,7 +43,10 @@ function DashboardPage() {
     isLoading: auctionsLoading,
     error: auctionsError,
     refetch: refetchAuctions
-  } = useAuctions()
+  } = useAuctions({
+    page: tablePagination.pageIndex + 1,
+    pageSize: tablePagination.pageSize,
+  })
 
   const {
     data: statsData,
@@ -428,8 +432,9 @@ function DashboardPage() {
                 ) : (
                   <AuctionTable 
                     data={areaFilteredAuctions} 
-                    totalCount={statsData?.totalCount}
+                    totalCount={auctionsData?.count ?? statsData?.totalCount}
                     isLoading={auctionsLoading}
+                    onPageChange={setTablePagination}
                     onPageSizeChange={setCurrentPageSize}
                     resetPageSignal={resetPageSignal}
                     onFilterStateChange={handleFilterStateChange}

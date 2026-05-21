@@ -11,7 +11,7 @@ export const useAuctions = (options = {}) => {
       const buildBaseQuery = () => {
         let query = supabase
           .from('auctions')
-          .select('*')
+          .select('*', { count: 'exact' })
           .order('inserted_at', { ascending: false })
 
         // Apply filters if provided
@@ -71,6 +71,8 @@ export const useAuctions = (options = {}) => {
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
+    // Keep previous page rows visible while next page is loading.
+    placeholderData: previousData => previousData,
   })
 }
 
